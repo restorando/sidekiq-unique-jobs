@@ -27,7 +27,19 @@ module SidekiqUniqueJobs
         private
 
         def unique_enabled?
-          worker_class.get_sidekiq_options['unique'] || item['unique']
+          if worker_class.respond_to? :get_sidekiq_options
+            worker_class.get_sidekiq_options['unique'] || item['unique']
+          else
+            item['unique']
+          end
+        end
+
+        def unique_job_expiration
+          if worker_class.respond_to? :get_sidekiq_options
+            worker_class.get_sidekiq_options['unique_job_expiration']
+          else
+            SidekiqUniqueJobs::Config.default_expiration
+          end
         end
 
         def log_duplicate_payload?
